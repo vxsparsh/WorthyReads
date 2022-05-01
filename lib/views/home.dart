@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:worthyreads/views/account.dart';
 import 'package:http/http.dart';
-import 'package:worthyreads/views/my_list.dart';
 
 //connecting to the endpoint
 class HttpService {
@@ -60,6 +59,8 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  final _saved = <Book>[];
+  final _suggestions = <Book>[];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -71,11 +72,7 @@ class _HomeState extends State<Home> {
         ),
       ),
       drawer: Drawer(
-        // Add a ListView to the drawer. This ensures the Book can scroll
-        // through the options in the drawer if there isn't enough vertical
-        // space to fit everything.
         child: ListView(
-          // Important: Remove any padding from the ListView.
           padding: EdgeInsets.zero,
           children: [
             DrawerHeader(
@@ -138,9 +135,10 @@ class _HomeState extends State<Home> {
                 ],
               ),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const MyList()),
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => SavedBooks(saved: _saved),
+                  ),
                 );
               },
             ),
@@ -194,20 +192,76 @@ class _HomeState extends State<Home> {
   ListView _buildbooks(BuildContext context, List<Book> books) {
     return ListView.builder(
       itemCount: books.length,
-      itemBuilder: (context, index) {
+      itemBuilder: (context, i) {
+        final index = i;
+        if (index >= _suggestions.length) {
+          _suggestions.addAll(books);
+        }
+
+        final alreadySaved = _saved.contains(_suggestions[index]);
         return Card(
           child: ListTile(
             title: Text(
-              (books[index].name),
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              _suggestions[index].name,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-            subtitle: Text(books[index].author),
-            trailing: IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.bookmark_add_outlined)),
+            subtitle: Text(
+              _suggestions[index].author,
+            ),
+            trailing: Icon(
+              alreadySaved ? Icons.bookmark_added : Icons.bookmark_add_outlined,
+              color: alreadySaved ? Colors.black : null,
+            ),
+            onTap: () {
+              setState(() {
+                if (alreadySaved) {
+                  _saved.remove(_suggestions[index]);
+                } else {
+                  _saved.add(_suggestions[index]);
+                }
+              });
+            },
           ),
         );
       },
+    );
+  }
+}
+
+class SavedBooks extends StatelessWidget {
+  const SavedBooks({Key? key, required this.saved}) : super(key: key);
+
+  final List<Book> saved;
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        centerTitle: true,
+        title: const Text('My List'),
+      ),
+      body: saved.isEmpty
+          ? const Center(
+              child: Text(
+                "Nothing Selected",
+                style: TextStyle(fontSize: 40),
+              ),
+            )
+          : ListView.builder(
+              itemCount: saved.length,
+              itemBuilder: (context, index) {
+                return Card(
+                  child: ListTile(
+                    title: Text(
+                      saved[index].name,
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(saved[index].author),
+                  ),
+                );
+              },
+            ),
     );
   }
 }
