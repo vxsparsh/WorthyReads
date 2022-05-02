@@ -1,6 +1,5 @@
 from flask import Flask
 from flask_restful import Api, Resource, reqparse
-import pandas as pd
 import json
 
 app = Flask(__name__)
