@@ -228,10 +228,16 @@ class _HomeState extends State<Home> {
   }
 }
 
-class SavedBooks extends StatelessWidget {
+class SavedBooks extends StatefulWidget {
   const SavedBooks({Key? key, required this.saved}) : super(key: key);
 
   final List<Book> saved;
+
+  @override
+  State<SavedBooks> createState() => _SavedBooksState();
+}
+
+class _SavedBooksState extends State<SavedBooks> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -240,28 +246,94 @@ class SavedBooks extends StatelessWidget {
         centerTitle: true,
         title: const Text('My List'),
       ),
-      body: saved.isEmpty
+      body: widget.saved.isEmpty
           ? const Center(
               child: Text(
-                "Nothing Selected",
-                style: TextStyle(fontSize: 40),
+                "Your List is Empty",
+                style: TextStyle(fontSize: 20),
               ),
             )
           : ListView.builder(
-              itemCount: saved.length,
+              itemCount: widget.saved.length,
               itemBuilder: (context, index) {
                 return Card(
                   child: ListTile(
                     title: Text(
-                      saved[index].name,
+                      widget.saved[index].name,
                       style: const TextStyle(
                           fontSize: 20, fontWeight: FontWeight.bold),
                     ),
-                    subtitle: Text(saved[index].author),
+                    subtitle: Text(widget.saved[index].author),
+                    trailing: IconButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const EditBookks()),
+                          );
+                        },
+                        icon: const FaIcon(FontAwesomeIcons.penToSquare)),
                   ),
                 );
               },
             ),
+    );
+  }
+}
+
+class EditBookks extends StatefulWidget {
+  const EditBookks({Key? key}) : super(key: key);
+
+  @override
+  State<EditBookks> createState() => _EditBookksState();
+}
+
+class _EditBookksState extends State<EditBookks> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        centerTitle: true,
+        title: const Text('Edit'),
+      ),
+      body: Container(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            const Text(
+              'Status\n',
+              style: TextStyle(fontSize: 20),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: const [
+                OutlinedButton(onPressed: null, child: Text('Reading')),
+                OutlinedButton(onPressed: null, child: Text('Completed')),
+                OutlinedButton(onPressed: null, child: Text('Plan to Read')),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: const [
+                OutlinedButton(onPressed: null, child: Text('On Hold')),
+                OutlinedButton(onPressed: null, child: Text('Dropped')),
+              ],
+            ),
+            /*const SizedBox(
+              height: 40,
+              width: 150,
+              child: TextField(
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: 'Chapters Read',
+                ),
+              ),
+            ),
+            const Text('/10'),*/
+          ],
+        ),
+      ),
     );
   }
 }
